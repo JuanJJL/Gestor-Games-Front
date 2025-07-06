@@ -1,0 +1,48 @@
+<!-- Página 2: usuarios.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" href="estilotrespaginas.css">
+</head>
+<body>
+  <header>
+    <h1>Gestión de Usuarios</h1>
+    <nav>
+      <a href="GestióndeVideojuegos.html">Videojuegos</a>
+      <a href="GestióndeUsuarios.html">Usuarios</a>
+      <a href="GestióndePréstamos.html">Préstamos</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Registrar/Editar Usuario</h2>
+      <form>
+        <input type="text" placeholder="Nombre completo" required>
+        <input type="text" placeholder="Documento de identidad" required>
+        <input type="email" placeholder="Correo electrónico" required>
+        <input type="tel" placeholder="Número de teléfono (opcional)">
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+    <section>
+      <h2>Lista de Usuarios</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Documento</th><th>Correo</th><th>Teléfono</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ana López</td><td>12345678</td><td>ana@example.com</td><td>3010000000</td>
+            <td><button>Editar</button><button>Eliminar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!-- Página 1: videojuegos.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Videojuegos</title>
+  <link rel="stylesheet" href="estilotrespaginas.css">
+</head>
+<body>
+  <header>
+    <h1>Gestión de Videojuegos</h1>
+    <nav>
+      <a href="GestióndeVideojuegos.html">Videojuegos</a>
+      <a href="GestióndeUsuarios.html">Usuarios</a>
+      <a href="GestióndePréstamos.html">Préstamos</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Registrar/Editar Videojuego</h2>
+      <form>
+        <input type="text" placeholder="Título" required>
+        <input type="text" placeholder="Desarrolladora" required>
+        <input type="text" placeholder="Calificación" required>
+        <select required>
+          <option disabled selected>Selecciona un género</option>
+          <option value="Aventura">Aventura</option>
+          <option value="Horror">Horror</option>
+          <option value="Deportes">Deportes</option>
+          <option value="Carreras">Carreras</option>
+          <option value="Comedia">Comedia</option>
+        </select>
+        <input type="date" required>
+        <input type="number" placeholder="Precio" step="0.01" required>
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+    <section>
+      <h2>Catálogo de Videojuegos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th><th>Desarrolladora</th><th>Calificación</th><th>Género</th><th>Fecha</th><th>Precio</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ejemplo</td><td>StudioX</td><td>9.0</td><td>Aventura</td><td>2024-01-01</td><td>$60.00</td>
+            <td><button>Editar</button><button>Eliminar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
