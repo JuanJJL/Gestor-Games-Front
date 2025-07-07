@@ -1,11 +1,10 @@
-<!-- Página 1: videojuegos.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gestión de Videojuegos</title>
-  <link rel="stylesheet" href="estilotrespaginas.css">
+  <link rel="stylesheet" href="estilotrespaginas.css" />
 </head>
 <body>
   <header>
@@ -16,14 +15,15 @@
       <a href="GestióndePréstamos.html">Préstamos</a>
     </nav>
   </header>
+
   <main>
     <section>
       <h2>Registrar/Editar Videojuego</h2>
       <form>
-        <input type="text" placeholder="Título" required>
-        <input type="text" placeholder="Desarrolladora" required>
-        <input type="text" placeholder="Calificación" required>
-        <select required>
+        <input type="text" placeholder="Título" required id="titulo" />
+        <input type="text" placeholder="Desarrolladora" required id="desarrolladora" />
+        <input type="text" placeholder="Calificación" required id="calificacion" />
+        <select required id="selecciongenero">
           <option disabled selected>Selecciona un género</option>
           <option value="Aventura">Aventura</option>
           <option value="Horror">Horror</option>
@@ -31,27 +31,132 @@
           <option value="Carreras">Carreras</option>
           <option value="Comedia">Comedia</option>
         </select>
-        <input type="date" required>
-        <input type="number" placeholder="Precio" step="0.01" required>
-        <button type="submit">Guardar</button>
+        <input type="date" required id="fecha" />
+        <input type="number" placeholder="Precio" step="0.01" required id="precio" />
+        <button type="submit" id="botonguardar">Guardar</button>
       </form>
     </section>
+
     <section>
       <h2>Catálogo de Videojuegos</h2>
       <table>
         <thead>
           <tr>
-            <th>Título</th><th>Desarrolladora</th><th>Calificación</th><th>Género</th><th>Fecha</th><th>Precio</th><th>Acciones</th>
+            <th>Título</th>
+            <th>Desarrolladora</th>
+            <th>Calificación</th>
+            <th>Género</th>
+            <th>Fecha</th>
+            <th>Precio</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Ejemplo</td><td>StudioX</td><td>9.0</td><td>Aventura</td><td>2024-01-01</td><td>$60.00</td>
-            <td><button>Editar</button><button>Eliminar</button></td>
-          </tr>
+          <!-- Nuevas filas se agregarán aquí dinámicamente -->
         </tbody>
       </table>
     </section>
   </main>
+
+  <script>
+    const $ = (el) => document.querySelector(el);
+
+    const inputTitulo = $("#titulo");
+    const inputDesarrolladora = $("#desarrolladora");
+    const inputCalificacion = $("#calificacion");
+    const selectGenero = $("#selecciongenero");
+    const inputFecha = $("#fecha");
+    const inputPrecio = $("#precio");
+    const botonGuardar = $("#botonguardar");
+
+    const tbody = document.querySelector("tbody");
+    let editando = null;
+
+    botonGuardar.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const titulo = inputTitulo.value.trim();
+      const desarrolladora = inputDesarrolladora.value.trim();
+      const calificacion = inputCalificacion.value.trim();
+      const genero = selectGenero.value;
+      const fecha = inputFecha.value;
+      const precio = inputPrecio.value.trim();
+
+      if (!titulo || !desarrolladora || !calificacion || !genero || !fecha || !precio) {
+        alert("Todos los campos son obligatorios.");
+        return;
+      }
+
+      const videojuego = {
+        titulo,
+        desarrolladora,
+        calificacion,
+        genero,
+        fechaSalida: fecha,
+        precio: parseFloat(precio)
+      };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/games", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(videojuego)
+        });
+
+        if (!response.ok) throw new Error("Error al guardar en el servidor");
+
+        const data = await response.json();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${data.titulo}</td>
+          <td>${data.desarrolladora}</td>
+          <td>${data.calificacion}</td>
+          <td>${data.genero}</td>
+          <td>${data.fechaSalida}</td>
+          <td>$${parseFloat(data.precio).toFixed(2)}</td>
+          <td>
+            <button class="editar">Editar</button>
+            <button class="eliminar">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Limpiar el formulario
+        inputTitulo.value = "";
+        inputDesarrolladora.value = "";
+        inputCalificacion.value = "";
+        selectGenero.selectedIndex = 0;
+        inputFecha.value = "";
+        inputPrecio.value = "";
+        botonGuardar.textContent = "Guardar";
+        editando = null;
+
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        alert("Ocurrió un error al guardar el videojuego.");
+      }
+    });
+
+    tbody.addEventListener("click", (e) => {
+      const fila = e.target.closest("tr");
+
+      if (e.target.classList.contains("eliminar")) {
+        fila.remove();
+      }
+
+      if (e.target.classList.contains("editar")) {
+        inputTitulo.value = fila.children[0].textContent;
+        inputDesarrolladora.value = fila.children[1].textContent;
+        inputCalificacion.value = fila.children[2].textContent;
+        selectGenero.value = fila.children[3].textContent;
+        inputFecha.value = fila.children[4].textContent;
+        inputPrecio.value = fila.children[5].textContent.replace("$", "");
+
+        editando = fila;
+        botonGuardar.textContent = "Actualizar";
+      }
+    });
+  </script>
 </body>
 </html>
