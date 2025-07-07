@@ -18,28 +18,14 @@
   </header>
   <main>
     <section>
-            <h2>Registrar Préstamo</h2>
-            <form id="formRegistrarPrestamo">
-                <div class="form-group">
-                    <label for="videojuegoId">ID Videojuego:</label>
-                    <input type="number" id="videojuegoId" placeholder="ID Videojuego" required>
-                </div>
-                <div class="form-group">
-                    <label for="clienteId">ID Cliente:</label>
-                    <input type="number" id="clienteId" placeholder="ID Cliente" required>
-                </div>
-                <div class="form-group">
-                    <label for="fechaDevolucion">Fecha límite de devolución:</label>
-                    <input type="date" id="fechaDevolucion" required>
-                </div>
-                <div class="form-group">
-                    <label for="totalPrestamo">Total del Préstamo:</label>
-                    <input type="number" id="totalPrestamo" step="0.01" placeholder="Ej: 5.00" required>
-                </div>
-                <button type="submit">Registrar préstamo</button>
-            </form>
-            <div id="messageContainer" class="message-container" style="display: none;"></div>
-        </section>
+      <h2>Registrar Préstamo</h2>
+      <form id="formPrestamo">
+        <input type="text" placeholder="Seleccionar Videojuego" required id="videojuego">
+        <input type="text" placeholder="Seleccionar Cliente" required id="cliente">
+        <input type="date" placeholder="Fecha límite de devolución" required id="fechaDevolucion">
+        <button type="submit" id="registrarPrestamo">Registrar préstamo</button>
+      </form>
+    </section>
     <section>
       <h2>Lista de Préstamos</h2>
       <table>
@@ -48,134 +34,82 @@
             <th>Videojuego</th><th>Cliente</th><th>Fecha préstamo</th><th>Fecha devolución</th><th>Estado</th><th>Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="tablaPrestamos">
           <tr>
             <td>Juego 1</td><td>Ana López</td><td>2025-07-06</td><td>2025-07-13</td><td>Pendiente</td>
-            <td><button>Devolver</button></td>
+            <td><button class="devolver">Devolver</button></td>
           </tr>
         </tbody>
       </table>
     </section>
   </main>
-</body>
   <script>
+    const $ = (el) => document.querySelector(el);
+    const formPrestamo = $('#formPrestamo');
+    const inputVideojuego = $('#videojuego');
+    const inputCliente = $('#cliente');
+    const inputFechaDevolucion = $('#fechaDevolucion');
+    const tablaPrestamos = $('#tablaPrestamos');
+    const BACKEND_URL = 'http://localhost:8080/api/loans';
 
-        const $ = (el) => document.queryselector(el);
-        const formRegistrarPrestamo = $('formRegistrarPrestamo');
-        const videojuegoIdInput = $('#videojuegoId');
-        const clienteIdInput = $('#clienteId');
-        const fechaDevolucionInput = $('#fechaDevolucion');
-        const totalPrestamoInput = $('#totalPrestamo');
-        const messageContainer = $('#messageContainer');
+    formPrestamo.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-        const BACKEND_URL = 'http://localhost:8080/api/loans';
+      const videojuego = inputVideojuego.value.trim();
+      const cliente = inputCliente.value.trim();
+      const fechaDevolucion = inputFechaDevolucion.value;
 
-  
-        function showMessage(message, type) {
-            messageContainer.textContent = message;
-            messageContainer.className = `message-container message-${type}`;
-            messageContainer.style.display = 'block';
+      if (!videojuego || !cliente || !fechaDevolucion) {
+        alert("Todos los campos son obligatorios");
+        return;
+      }
 
-            // Ocultar el mensaje después de 5 segundos
-            setTimeout(() => {
-                messageContainer.style.display = 'none';
-            }, 5000);
-        }
-        async function registrarPrestamoBackend(datosPrestamo) {
-            try {
-                const respuesta = await fetch(BACKEND_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json' // Indicar que el cuerpo de la solicitud es JSON
-                    },
-                    body: JSON.stringify(datosPrestamo) // Convertir el objeto JavaScript a una cadena JSON
-                });
-              if (respuesta.ok) {
-                    const resultado = await respuesta.json(); // Parsear la respuesta JSON del backend
-                    console.log('Préstamo registrado con éxito:', resultado);
-                    showMessage('Préstamo registrado con éxito.', 'success');
-                    formRegistrarPrestamo.reset(); // Limpiar el formulario después del éxito
-                } else {
-                    const errorData = await respuesta.json(); // Asume que el backend envía errores en JSON
-                    const errorMessage = errorData.message || 'Error desconocido al registrar el préstamo.';
-                    console.error('Error al registrar el préstamo:', respuesta.status, errorData);
-                    showMessage(`Error: ${errorMessage}`, 'error');
-                }
-            } catch (error) {
-                // Capturar errores de red o cualquier otro error durante la solicitud
-                console.error('Error de conexión o inesperado:', error);
-                showMessage('Error de conexión con el servidor. Inténtalo de nuevo.', 'error');
-            }
-        }
+      const fechaPrestamo = new Date().toISOString().split('T')[0];
 
+      const prestamo = {
+        videojuego,
+        cliente,
+        fechaPrestamo,
+        fechaDevolucion,
+        estado: "Pendiente"
+      };
 
-        submitButton.addEventListener('click', async (e) => {
-            e.preventDefault(); // Prevenir el envío del formulario por defecto el cual es recargar la página
-
-            // Ocultar cualquier mensaje anterior y resetear clases de error
-            messageContainer.classList.add('message-invisible');
-            messageContainer.style.display = 'none';
-
-            // 1. Obtener los valores de los campos del formulario
-            const videojuegoId = videojuegoIdInput.value.trim(); // .trim() para quitar espacios en blanco
-            const clienteId = clienteIdInput.value.trim();
-            const fechaDevolucion = fechaDevolucionInput.value.trim();
-            const totalPrestamo = totalPrestamoInput.value.trim();
-
-            
-            if (videojuegoId === '') {
-                showMessage("El ID del Videojuego es obligatorio.", 'error');
-                return; // Detener la ejecución si hay un error de validación
-            }
-            if (isNaN(parseInt(videojuegoId))) {
-                 showMessage("El ID del Videojuego debe ser un número.", 'error');
-                 return;
-            }
-
-            if (clienteId === '') {
-                showMessage("El ID del Cliente es obligatorio.", 'error');
-                return;
-            }
-            if (isNaN(parseInt(clienteId))) {
-                 showMessage("El ID del Cliente debe ser un número.", 'error');
-                 return;
-            }
-
-            if (fechaDevolucion === '') {
-                showMessage("La Fecha de Devolución es obligatoria.", 'error');
-                return;
-            }
-            // Validación de fecha básica (formato YYYY-MM-DD)
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/; //verifica que tenga la cantidad de digitos (d) necesarios
-            if (!dateRegex.test(fechaDevolucion)) {
-                showMessage("La Fecha de Devolución no tiene un formato válido (YYYY-MM-DD).", 'error');
-                return;
-            }
-
-            if (totalPrestamo === '') {
-                showMessage("El Total del Préstamo es obligatorio.", 'error');
-                return;
-            }
-            if (isNaN(parseFloat(totalPrestamo))) {
-                showMessage("El Total del Préstamo debe ser un número.", 'error');
-                return;
-            }
-
-
-            // Si todas las validaciones pasan, preparar los datos y llamar a la función de envío
-            const now = new Date();
-            const fechaPrestamo = now.toISOString().slice(0, 19).replace('T', ' '); //el .slice(0, 19) elimina los milisegundos y se remplaza luego la t por un espacio
-
-            const datosPrestamo = {
-                id_juego: parseInt(videojuegoId),
-                id_usuario: parseInt(clienteId),
-                fecha_prestamo: fechaPrestamo,
-                fin_prestamo: fechaDevolucion, // Se asume que el backend gestionará la hora de fin si es necesario
-                total: parseFloat(totalPrestamo)
-            };
-
-            // Llamar a la función que maneja el envío al backend
-            await registrarPrestamoBackend(datosPrestamo);
+      try {
+        const response = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(prestamo)
         });
-    </script>
+
+        if (!response.ok) throw new Error("Error al registrar el préstamo");
+
+        const data = await response.json();
+
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${data.videojuego}</td>
+          <td>${data.cliente}</td>
+          <td>${data.fechaPrestamo}</td>
+          <td>${data.fechaDevolucion}</td>
+          <td>${data.estado}</td>
+          <td><button class="devolver">Devolver</button></td>
+        `;
+        tablaPrestamos.appendChild(fila);
+
+        formPrestamo.reset();
+      } catch (err) {
+        console.error("Error en el fetch:", err);
+        alert("Hubo un error al registrar el préstamo.");
+      }
+    });
+
+    tablaPrestamos.addEventListener("click", (e) => {
+      if (e.target.classList.contains("devolver")) {
+        const fila = e.target.closest("tr");
+        fila.children[4].textContent = "Devuelto";
+        e.target.disabled = true;
+      }
+    });
+  </script>
+</body>
 </html>
