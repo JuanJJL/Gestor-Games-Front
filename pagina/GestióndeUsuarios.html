@@ -1,4 +1,3 @@
-<!-- Página 2: usuarios.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -16,160 +15,123 @@
       <a href="GestióndePréstamos.html">Préstamos</a>
     </nav>
   </header>
+
   <main>
     <section>
-            <h2>Registrar/Editar Usuario</h2>
-            <form id="formRegistrarUsuario">
-                <div class="form-group">
-                    <label for="inputNombre">Nombre completo:</label>
-                    <input type="text" id="inputNombre" placeholder="Nombre completo" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputDocumento">Documento de identidad:</label>
-                    <input type="text" id="inputDocumento" placeholder="Documento de identidad" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputCorreo">Correo electrónico:</label>
-                    <input type="email" id="inputCorreo" placeholder="Correo electrónico" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputTelefono">Número de teléfono (opcional):</label>
-                    <input type="tel" id="inputTelefono" placeholder="Número de teléfono (opcional)">
-                </div>
-                <button type="submit" id="submitButton">Guardar</button>
-            </form>
-            <div id="messageContainer" class="message-container message-invisible"></div>
-        </section>
+      <h2>Registrar/Editar Usuario</h2>
+      <form>
+        <input type="text" placeholder="Nombre completo" required id="nombre" />
+        <input type="text" placeholder="Documento de identidad" required id="documento" />
+        <input type="email" placeholder="Correo electrónico" required id="correo" />
+        <input type="tel" placeholder="Número de teléfono (opcional)" id="telefono" />
+        <button type="submit" id="botonGuardar">Guardar</button>
+      </form>
+    </section>
+
     <section>
       <h2>Lista de Usuarios</h2>
       <table>
         <thead>
           <tr>
-            <th>Nombre</th><th>Documento</th><th>Correo</th><th>Teléfono</th><th>Acciones</th>
+            <th>Nombre</th>
+            <th>Documento</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Ana López</td><td>12345678</td><td>ana@example.com</td><td>3010000000</td>
-            <td><button>Editar</button><button>Eliminar</button></td>
-          </tr>
+          <!-- Nuevos usuarios se insertarán aquí -->
         </tbody>
       </table>
     </section>
   </main>
-</body>
+
   <script>
-        // Función de utilidad para seleccionar elementos del DOM
-        const $ = (el) => document.querySelector(el);
+    const $ = (el) => document.querySelector(el);
 
-        // Referencias a los elementos del formulario usando la función $
-        const formRegistrarUsuario = $('#formRegistrarUsuario');
-        const inputNombre = $('#inputNombre');
-        const inputDocumento = $('#inputDocumento');
-        const inputCorreo = $('#inputCorreo');
-        const inputTelefono = $('#inputTelefono');
-        const submitButton = $('#submitButton'); 
-        const messageContainer = $('#messageContainer'); 
+    const inputNombre = $('#nombre');
+    const inputDocumento = $('#documento');
+    const inputCorreo = $('#correo');
+    const inputTelefono = $('#telefono');
+    const botonGuardar = $('#botonGuardar');
+    const tbody = document.querySelector('tbody');
+    let editando = null;
 
-        // URL de tu backend para gestionar usuarios
-        // ¡IMPORTANTE! Debes cambiar esta URL por la dirección real de tu API de backend.
-        // Por ejemplo: 'http://localhost:8080/api/usuarios'
-        const BACKEND_URL = 'http://localhost:8080/api/users'; 
+    botonGuardar.addEventListener("click", async (e) => {
+      e.preventDefault();
 
-      
-        function showMessage(message, type) {
-            messageContainer.textContent = message;
-            messageContainer.classList.remove('message-invisible', 'message-success', 'message-error', 'text-red-500'); // Limpiar clases anteriores
-            messageContainer.classList.add(`message-${type}`);
+      const nombre = inputNombre.value.trim();
+      const documento = inputDocumento.value.trim();
+      const correo = inputCorreo.value.trim();
+      const telefono = inputTelefono.value.trim();
 
-            if (type === 'error') {
-                messageContainer.classList.add('text-red-500'); // Aplicar estilo de texto rojo para errores
-            }
-            messageContainer.style.display = 'block'; // Asegurarse de que esté visible
+      if (!nombre || !documento || !correo) {
+        alert("Los campos obligatorios deben estar completos.");
+        return;
+      }
 
-            // Ocultar el mensaje después de 5 segundos
-            setTimeout(() => {
-                messageContainer.classList.add('message-invisible'); // Ocultar con la clase
-                messageContainer.style.display = 'none'; // Asegurarse de que no ocupe espacio
-            }, 5000);
-        }
+      const usuario = {
+        nombre,
+        documento,
+        correo,
+        telefono
+      };
 
-        async function registrarUsuarioBackend(datosUsuario) {
-            try {
-                const response = await fetch(BACKEND_URL, {
-                    method: 'POST', // Método HTTP POST para enviar datos
-                    headers: {
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify(datosUsuario) // Convertir el objeto JavaScript a una cadena JSON
-                });
-
-                if (response.ok) {
-                    const resultado = await response.json(); // Parsear la respuesta JSON del backend
-                    console.log('Usuario registrado con éxito:', resultado);
-                    showMessage('Usuario registrado con éxito.', 'success');
-                    formRegistrarUsuario.reset(); 
-                  
-                } else {
-                    const errorData = await response.json(); // Asume que el backend envía errores en JSON
-                    const errorMessage = errorData.message || 'Error desconocido al registrar el usuario.';
-                    console.error('Error al registrar el usuario:', response.status, errorData);
-                    showMessage(`Error: ${errorMessage}`, 'error');
-                }
-            } catch (error) {
-                // Capturar errores de red o cualquier otro error durante la solicitud
-                console.error('Error de conexión o inesperado:', error);
-                showMessage('Error de conexión con el servidor. Inténtalo de nuevo.', 'error');
-            }
-        }
-
-        submitButton.addEventListener('click', async (e) => {
-            e.preventDefault(); // Prevenir el envío del formulario por defecto y la recarga de la página
-
-            // Ocultar cualquier mensaje anterior y resetear clases de error
-            messageContainer.classList.add('message-invisible');
-            messageContainer.style.display = 'none';
-
-            const nombre = inputNombre.value.trim();
-            const documento = inputDocumento.value.trim();
-            const correo = inputCorreo.value.trim();
-            const telefono = inputTelefono.value.trim(); 
-
-          //validaciones
-            if (nombre === '') {
-                showMessage("El nombre es obligatorio.", 'error');
-                return; // Detener la ejecución si hay un error de validación
-            }
-
-            if (documento === '') {
-                showMessage("El documento de identidad es obligatorio.", 'error');
-                return;
-            }
-
-            if (correo === '') {
-                showMessage("El correo electrónico es obligatorio.", 'error');
-                return;
-            }
-
-            // Validación de formato de correo electrónico
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;// Expresión regular para validar que el formato del correo electrónico sea básico ^ → Inicio de la cadena. [^\s@]+ → Uno o más caracteres que no sean espacios (\s) ni @  .@ → Un solo símbolo @  .[^\s@]+ → Uno o más caracteres que no sean espacios ni @ (el dominio)  .\. → Un punto literal.[^\s@]+ → Uno o más caracteres que no sean espacios ni @  .$ → Fin de la cadena.
-            if (!emailRegex.test(correo)) {
-                showMessage("El correo electrónico no es válido.", 'error');
-                return;
-            }
-
-            // Si todas las validaciones pasan, prepara los datos y llamar a la función de envío
-            const datosUsuario = {
-                nombre: nombre,
-                documento: documento,
-                correo: correo,
-                numero_telefono: telefono // Si el campo está vacío, se enviará como cadena vacía
-            };
-
-            console.log('Datos a enviar:', datosUsuario);
-
-            // Llamar a la función que maneja el envío al backend
-            await registrarUsuarioBackend(datosUsuario);
+      try {
+        const response = await fetch("http://localhost:8080/api/users ", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(usuario)
         });
-    </script>
+
+        if (!response.ok) throw new Error("Error al guardar en el servidor");
+
+        const data = await response.json();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${data.nombre}</td>
+          <td>${data.documento}</td>
+          <td>${data.correo}</td>
+          <td>${data.telefono}</td>
+          <td>
+            <button class="editar">Editar</button>
+            <button class="eliminar">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        inputNombre.value = "";
+        inputDocumento.value = "";
+        inputCorreo.value = "";
+        inputTelefono.value = "";
+        botonGuardar.textContent = "Guardar";
+        editando = null;
+
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        alert("Error al guardar el usuario.");
+      }
+    });
+
+    tbody.addEventListener("click", (e) => {
+      const fila = e.target.closest("tr");
+
+      if (e.target.classList.contains("eliminar")) {
+        fila.remove();
+      }
+
+      if (e.target.classList.contains("editar")) {
+        inputNombre.value = fila.children[0].textContent;
+        inputDocumento.value = fila.children[1].textContent;
+        inputCorreo.value = fila.children[2].textContent;
+        inputTelefono.value = fila.children[3].textContent;
+
+        editando = fila;
+        botonGuardar.textContent = "Actualizar";
+      }
+    });
+  </script>
+</body>
 </html>
